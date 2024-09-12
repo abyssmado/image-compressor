@@ -72,22 +72,35 @@ def process_files(folder, files):
                 # Compara data de criação do arquivo no servidor é a mesma de hoje
                 # if file["createdAt"] == today:
 
-                    # Usa a classe Image da biblioteca PIL para abrir o arquivo atual percorrido
-                    image_to_reduce = Image.open(f"{folder}/{file["name"] + file["extension"]}")
-                    # print(file["extension"])
-                    # Valida a extensão do arquivo para direciona-lo ao processamento correto
-                    if file["extension"] in [".jpg", ".jpeg", ".JPG", ".JPEG", ".png", ".PNG"]:
-                        print(file["extension"])
-                        # Comprimi o arquivo atual optimizando sua qualidade e diminuindo o seu tamanho, mantendo um minimo padrão para evitar perda de qualidade
-                        # Salva o arquvo comprimido na pasta destino (Em testes sendo a pasta de "output")
-                        image_to_reduce.save(f"{folder}/{file["name"] + file["extension"]}", optimize=True, quality=10)
-                    else:
-                        print(file["extension"])
-                        image_to_reduce.save(
-                            f"{folder}/{file["name"] + file["extension"]}",
-                            compression="tiff_lzw",
-                            tiffinfo={317: 2, 278: 1},
-                        )
+                # Usa a classe Image da biblioteca PIL para abrir o arquivo atual percorrido
+                image_to_reduce = Image.open(
+                    f"{folder}/{file["name"] + file["extension"]}"
+                )
+                # print(file["extension"])
+                # Valida a extensão do arquivo para direciona-lo ao processamento correto
+                if file["extension"] in [
+                    ".jpg",
+                    ".jpeg",
+                    ".JPG",
+                    ".JPEG",
+                    ".png",
+                    ".PNG",
+                ]:
+                    print(file["extension"])
+                    # Comprimi o arquivo atual optimizando sua qualidade e diminuindo o seu tamanho, mantendo um minimo padrão para evitar perda de qualidade
+                    # Salva o arquvo comprimido na pasta destino (Em testes sendo a pasta de "output")
+                    image_to_reduce.save(
+                        f"{folder}/{file["name"] + file["extension"]}",
+                        optimize=True,
+                        quality=10,
+                    )
+                else:
+                    print(file["extension"])
+                    image_to_reduce.save(
+                        f"{folder}/{file["name"] + file["extension"]}",
+                        compression="tiff_lzw",
+                        tiffinfo={317: 2, 278: 1},
+                    )
     except Exception as error:
         print(error)
 
@@ -102,7 +115,7 @@ def get_files(folder):
         for file_name in os.listdir(folder):
             file_path = os.path.join(folder, file_name)
             # print(file_path)
-            
+
             if os.path.isfile(file_path):
                 files_info.append(process_info(file_name, file_path))
 
