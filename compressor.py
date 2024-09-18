@@ -1,5 +1,5 @@
 from PIL import Image, ImageFile
-
+ 
 # Classe "Image" importada da biblioteca "PIL" usada para comprimir as imagens
 
 import os
@@ -55,56 +55,61 @@ def process_info(file_name, file_path):
     }
 
 
-def process_files(folder, files, index=None):
-    # try:
-    # i = 0
+def process_files(folder, files,index=None):
     # Retorna os dicionários com informações dos arquivos
     # Cria data de hoje formatada para validação
     # today = datetime.datetime.today().strftime(date_str_formatter)
-    # if index != None:
-    #     i = index
-    #     del files[: index + 1]
-    # Percorre os dicionários
-    for file in files:
-        # print(i)
-        # Valida se a extensão arquivo atual consta no array de extensões permitidos
-        if file["extension"].replace(".", "") in extensions:
-            print(file)
+        for file in files:
+            # Valida se a extensão arquivo atual consta no array de extensões permitidos
+            if file["extension"].replace(".", "") in extensions:
+                # print(file)
 
-            # Compara data de criação do arquivo no servidor é a mesma de hoje
-            # if file["createdAt"] == today:
-            # Usa a classe Image da biblioteca PIL para abrir o arquivo atual percorrido
+                # Compara data de criação do arquivo no servidor é a mesma de hoje
+                # if file["createdAt"] == today:
+                # Usa a classe Image da biblioteca PIL para abrir o arquivo atual percorrido
 
-            image_to_reduce = Image.open(f"{folder}/{file["name"] + file["extension"]}")
-            print(f"aaa")
+                image_to_reduce = None
+                try:
+                    image_to_reduce = Image.open(f"{folder}/{file["name"] + file["extension"]}")
+                except Exception:
+                    print("gerou erro")
+                    continue
 
-            # Valida a extensão do arquivo para direciona-lo ao processamento correto
-            if file["extension"] in [
-                ".jpg",
-                ".jpeg",
-                ".JPG",
-                ".JPEG",
-                ".png",
-                ".PNG",
-            ]:
-                # Comprimi o arquivo atual optimizando sua qualidade e diminuindo o seu tamanho, mantendo um minimo padrão para evitar perda de qualidade
-                # Salva o arquvo comprimido na pasta destino (Em testes sendo a pasta de "output")
-                image_to_reduce.save(
-                    f"{folder}/{file["name"] + file["extension"]}",
-                    optimize=True,
-                    quality=10,
-                )
-            else:
-                image_to_reduce.save(
-                    f"{folder}/{file["name"] + file["extension"]}",
-                    # f"{folder}/{file["name"] + file["extension"]}",
-                    compression="tiff_lzw",
-                    tiffinfo={317: 2, 278: 1},
-                )
+                # Valida a extensão do arquivo para direciona-lo ao processamento correto
+                if file["extension"] in [
+                    ".jpg",
+                    ".jpeg",
+                    ".JPG",
+                    ".JPEG",
+                    ".png",
+                    ".PNG",
+                ]:
+                    # Comprimi o arquivo atual optimizando sua qualidade e diminuindo o seu tamanho, mantendo um minimo padrão para evitar perda de qualidade
+                    # Salva o arquvo comprimido na pasta destino (Em testes sendo a pasta de "output")
 
-
-# except Exception as error:
-#     print(error)
+                    image_to_reduce.save(
+                        f"{folder}/!{file["name"] + file["extension"]}",
+                        optimize=True,
+                        quality=10,
+                    )
+                else:
+                    try:
+                        image_to_reduce.save(
+                            f"{folder}/{file["name"] + file["extension"]}",
+                            compression="tiff_lzw",
+                            tiffinfo={317: 2, 278: 1},
+                        )
+                    except Exception:
+                        image_to_reduce.save(
+                            f"{folder}/@{file["name"] + file["extension"]}",
+                            compression="tiff_lzw",
+                            tiffinfo={317: 2, 278: 1},
+                        )
+                        image_to_reduce.close()
+                        print("save")
+                        os.remove(f"{folder}/{file["name"] + file["extension"]}")
+                        print("remove")
+                        os.rename(f"{folder}/@{file["name"] + file["extension"]}", f"{folder}/{file["name"] + file["extension"]}")
 
 
 def get_files(folder):
