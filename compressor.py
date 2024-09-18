@@ -1,4 +1,4 @@
-from PIL import Image
+from PIL import Image, ImageFile
 
 # Classe "Image" importada da biblioteca "PIL" usada para comprimir as imagens
 
@@ -9,7 +9,6 @@ import os
 import datetime
 
 # Biblioteca "datetime" usada para manipular datas usadas nos scripts
-
 # String de formatação para as datas
 date_str_formatter = "%d/%m/%Y"
 
@@ -35,10 +34,10 @@ extensions = [
 
 
 def process_info(file_name, file_path):
-    # print("is file")
     name, extension = os.path.splitext(file_name)
     file_created_at = os.path.getctime(file_path)
     file_updated_at = os.path.getmtime(file_path)
+    file_size = os.path.getsize(file_path)
     # Formata o valor recebido das datas para um valor legível
     created_at_readable = datetime.datetime.fromtimestamp(file_created_at).strftime(
         date_str_formatter
@@ -46,63 +45,66 @@ def process_info(file_name, file_path):
     updated_at_readable = datetime.datetime.fromtimestamp(file_updated_at).strftime(
         date_str_formatter
     )
-
     # Cria os dicionários com as informações dos arquivos encontrados
     return {
         "name": name,
         "extension": extension,
         "createdAt": created_at_readable,
         "updatedAt": updated_at_readable,
+        "size": int(file_size / 1024 / 1024),
     }
 
 
-def process_files(folder, files):
-    try:
-        # Retorna os dicionários com informações dos arquivos
-        # Cria data de hoje formatada para validação
-        today = datetime.datetime.today().strftime(date_str_formatter)
+def process_files(folder, files, index=None):
+    # try:
+    # i = 0
+    # Retorna os dicionários com informações dos arquivos
+    # Cria data de hoje formatada para validação
+    # today = datetime.datetime.today().strftime(date_str_formatter)
+    # if index != None:
+    #     i = index
+    #     del files[: index + 1]
+    # Percorre os dicionários
+    for file in files:
+        # print(i)
+        # Valida se a extensão arquivo atual consta no array de extensões permitidos
+        if file["extension"].replace(".", "") in extensions:
+            print(file)
 
-        # Percorre os dicionários
-        for file in files:
+            # Compara data de criação do arquivo no servidor é a mesma de hoje
+            # if file["createdAt"] == today:
+            # Usa a classe Image da biblioteca PIL para abrir o arquivo atual percorrido
 
-            # Valida se a extensão arquivo atual consta no array de extensões permitidos
-            if file["extension"].replace(".", "") in extensions:
-                print(file)
+            image_to_reduce = Image.open(f"{folder}/{file["name"] + file["extension"]}")
+            print(f"aaa")
 
-                # Compara data de criação do arquivo no servidor é a mesma de hoje
-                # if file["createdAt"] == today:
-
-                # Usa a classe Image da biblioteca PIL para abrir o arquivo atual percorrido
-                image_to_reduce = Image.open(
-                    f"{folder}/{file["name"] + file["extension"]}"
+            # Valida a extensão do arquivo para direciona-lo ao processamento correto
+            if file["extension"] in [
+                ".jpg",
+                ".jpeg",
+                ".JPG",
+                ".JPEG",
+                ".png",
+                ".PNG",
+            ]:
+                # Comprimi o arquivo atual optimizando sua qualidade e diminuindo o seu tamanho, mantendo um minimo padrão para evitar perda de qualidade
+                # Salva o arquvo comprimido na pasta destino (Em testes sendo a pasta de "output")
+                image_to_reduce.save(
+                    f"{folder}/{file["name"] + file["extension"]}",
+                    optimize=True,
+                    quality=10,
                 )
-                # print(file["extension"])
-                # Valida a extensão do arquivo para direciona-lo ao processamento correto
-                if file["extension"] in [
-                    ".jpg",
-                    ".jpeg",
-                    ".JPG",
-                    ".JPEG",
-                    ".png",
-                    ".PNG",
-                ]:
-                    print(file["extension"])
-                    # Comprimi o arquivo atual optimizando sua qualidade e diminuindo o seu tamanho, mantendo um minimo padrão para evitar perda de qualidade
-                    # Salva o arquvo comprimido na pasta destino (Em testes sendo a pasta de "output")
-                    image_to_reduce.save(
-                        f"{folder}/{file["name"] + file["extension"]}",
-                        optimize=True,
-                        quality=10,
-                    )
-                else:
-                    print(file["extension"])
-                    image_to_reduce.save(
-                        f"{folder}/{file["name"] + file["extension"]}",
-                        compression="tiff_lzw",
-                        tiffinfo={317: 2, 278: 1},
-                    )
-    except Exception as error:
-        print(error)
+            else:
+                image_to_reduce.save(
+                    f"{folder}/{file["name"] + file["extension"]}",
+                    # f"{folder}/{file["name"] + file["extension"]}",
+                    compression="tiff_lzw",
+                    tiffinfo={317: 2, 278: 1},
+                )
+
+
+# except Exception as error:
+#     print(error)
 
 
 def get_files(folder):
@@ -125,7 +127,7 @@ def get_files(folder):
                 process_files(file_path, input_folder_files)
 
     except Exception as err:
-        print(f"Erro ao processar a pasta: {err}")
+        print(f"Erro ao processar: {err}")
 
     return files_info
 
